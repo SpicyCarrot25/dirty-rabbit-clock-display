@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dirty Rabbit - Control de Horario</title>
+    <title>Clock - Dirty Rabbit</title>
     <style>
         * {
             margin: 0;
@@ -12,103 +12,81 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: #333;
         }
         
-        .container {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        .card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
             padding: 40px 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             max-width: 350px;
             width: 90%;
         }
         
-        .logo {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 30px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-        
-        .employee-photo {
-            width: 100px;
-            height: 100px;
+        .employee-avatar {
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
-            background: #fff;
+            background: #f0f0f0;
             margin: 0 auto 20px;
-            border: 4px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 36px;
-            color: #8B4513;
+            font-size: 40px;
+            border: 2px solid #e0e0e0;
         }
         
-        .employee-name {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 10px;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-        }
-        
-        .action {
-            font-size: 20px;
-            margin-bottom: 15px;
-            padding: 15px;
-            border-radius: 15px;
-            font-weight: 500;
-        }
-        
-        .clock-in {
-            background: rgba(76, 175, 80, 0.8);
-            border: 2px solid #4CAF50;
-        }
-        
-        .clock-out {
-            background: rgba(244, 67, 54, 0.8);
-            border: 2px solid #f44336;
-        }
-        
-        .error {
-            background: rgba(255, 152, 0, 0.8);
-            border: 2px solid #ff9800;
-        }
-        
-        .time {
+        .status-text {
             font-size: 18px;
-            margin-bottom: 15px;
-            font-family: 'Courier New', monospace;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 10px;
-            border-radius: 10px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
-        .message {
-            font-size: 16px;
-            line-height: 1.4;
+        .status-text.clock-in {
+            color: #4CAF50;
+        }
+        
+        .status-text.clock-out {
+            color: #f44336;
+        }
+        
+        .status-text.error {
+            color: #ff9800;
+        }
+        
+        .greeting {
+            font-size: 24px;
             margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .time-display {
+            font-size: 20px;
+            color: #666;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
         }
         
         .auto-close {
             font-size: 14px;
-            opacity: 0.8;
+            color: #999;
             animation: pulse 2s infinite;
         }
         
         @keyframes pulse {
-            0%, 100% { opacity: 0.8; }
-            50% { opacity: 0.4; }
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
         
         .success-animation {
@@ -117,68 +95,56 @@
         
         @keyframes successPulse {
             0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            50% { transform: scale(1.02); }
             100% { transform: scale(1); }
         }
     </style>
 </head>
 <body>
-    <div class="container" id="main-container">
-        <div class="logo">☕ Dirty Rabbit</div>
-        
-        <div class="employee-photo" id="employee-photo">
+    <div class="card" id="main-card">
+        <div class="employee-avatar" id="employee-avatar">
             👤
         </div>
         
-        <div class="employee-name" id="employee-name">
-            Cargando...
-        </div>
-        
-        <div class="action" id="action-status">
+        <div class="status-text" id="status-text">
             Procesando...
         </div>
         
-        <div class="time" id="current-time">
-            --:--:--
+        <div class="greeting" id="greeting">
+            Cargando...
         </div>
         
-        <div class="message" id="status-message">
-            Verificando estado...
+        <div class="time-display" id="time-display">
+            Hora: --:--:--
         </div>
         
         <div class="auto-close">
-            Cerrando automáticamente en <span id="countdown">5</span>s
+            Se cierra en <span id="countdown">5</span> segundos
         </div>
     </div>
 
-    <!-- Audio elements for different actions -->
+    <!-- Audio elements (hidden) -->
     <audio id="clock-in-sound" preload="auto">
-        <!-- Google Actions sounds (reliable CDN) -->
         <source src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" type="audio/ogg">
-        <!-- Backup: data URL for simple beep -->
         <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYeBDuU2/LTgCwELnzK7+GGRAX9Y7zk4H3AZAAABCgA" type="audio/wav">
     </audio>
 
     <audio id="clock-out-sound" preload="auto">
-        <!-- Google Actions sounds (reliable CDN) -->
         <source src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_short.ogg" type="audio/ogg">
-        <!-- Backup: data URL for simple beep -->
         <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYeBDuU2/LTgCwELnzK7+GGRAX9Y7zk4H3AZAAABCgA" type="audio/wav">
     </audio>
 
     <audio id="error-sound" preload="auto">
-        <!-- Google Actions sounds (reliable CDN) -->
         <source src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg" type="audio/ogg">
-        <!-- Backup: data URL for simple error beep -->
         <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYeBDuU2/LTgCwELnzK7+GGRAX9Y7zk4H3AZAAABCgA" type="audio/wav">
     </audio>
 
     <script>
         // Employee data
         const employees = {
-            'DR001': { name: 'Maria Garcia', emoji: '👩‍💼' },
-            'DR002': { name: 'Francisca Lopez', emoji: '👩‍🍳' },
-            'DR003': { name: 'Juan Martinez', emoji: '👨‍💼' }
+            'DR001': { name: 'Maria', emoji: '👩‍💼' },
+            'DR002': { name: 'Francisca', emoji: '👩‍🍳' },
+            'DR003': { name: 'Juan', emoji: '👨‍💼' }
         };
 
         // Get URL parameters
@@ -189,51 +155,23 @@
         const timestamp = urlParams.get('timestamp');
         const hours = urlParams.get('hours');
 
-        // Audio control with better browser compatibility
+        // Audio control
         function playSound(soundType) {
             try {
                 const audio = document.getElementById(soundType + '-sound');
                 if (audio) {
-                    audio.volume = 0.3; // Keep it gentle
-                    
-                    // Create a promise-based approach with fallback
+                    audio.volume = 0.2; // Gentle volume
                     const playPromise = audio.play();
                     
                     if (playPromise !== undefined) {
-                        playPromise
-                            .then(() => {
-                                console.log('Audio played successfully');
-                            })
-                            .catch(error => {
-                                console.log('Audio play failed:', error);
-                                // Enable audio on next user interaction
-                                enableAudioOnInteraction();
-                            });
+                        playPromise.catch(error => {
+                            console.log('Audio play failed:', error);
+                        });
                     }
                 }
             } catch (e) {
                 console.log('Audio error:', e);
-                enableAudioOnInteraction();
             }
-        }
-
-        // Enable audio on user interaction (required by many browsers)
-        function enableAudioOnInteraction() {
-            const enableAudio = () => {
-                const audios = document.querySelectorAll('audio');
-                audios.forEach(audio => {
-                    audio.muted = false;
-                    audio.play().then(() => {
-                        audio.pause();
-                        audio.currentTime = 0;
-                    }).catch(() => {});
-                });
-            };
-
-            // Add listeners for various interaction types
-            ['click', 'touchstart', 'keydown'].forEach(event => {
-                document.addEventListener(event, enableAudio, { once: true });
-            });
         }
 
         // Update display
@@ -243,40 +181,39 @@
             
             // Update employee info
             if (employee) {
-                document.getElementById('employee-name').textContent = employee.name;
-                document.getElementById('employee-photo').textContent = employee.emoji;
+                document.getElementById('employee-avatar').textContent = employee.emoji;
             }
             
             // Update time
-            document.getElementById('current-time').textContent = 
-                now.toLocaleTimeString('es-ES', { 
+            document.getElementById('time-display').textContent = 
+                'Hora: ' + now.toLocaleTimeString('es-ES', { 
                     hour12: false, 
                     timeZone: 'Europe/Madrid' 
                 });
             
-            // Update status and play appropriate sound
-            const actionElement = document.getElementById('action-status');
-            const messageElement = document.getElementById('status-message');
+            // Update status
+            const statusElement = document.getElementById('status-text');
+            const greetingElement = document.getElementById('greeting');
             
             if (status === 'success') {
-                document.getElementById('main-container').classList.add('success-animation');
+                document.getElementById('main-card').classList.add('success-animation');
                 
                 if (action === 'CLOCK_IN') {
-                    actionElement.className = 'action clock-in';
-                    actionElement.innerHTML = '🟢 ¡ENTRADA REGISTRADA!';
-                    messageElement.textContent = `¡Hola ${employee?.name || 'Usuario'}! Tu entrada ha sido registrada correctamente.`;
-                    setTimeout(() => playSound('clock-in'), 100); // Small delay for better UX
+                    statusElement.className = 'status-text clock-in';
+                    statusElement.textContent = 'CLOCK IN';
+                    greetingElement.textContent = `¡Hola ${employee?.name || 'Usuario'}!`;
+                    setTimeout(() => playSound('clock-in'), 100);
                 } else if (action === 'CLOCK_OUT') {
-                    actionElement.className = 'action clock-out';
-                    actionElement.innerHTML = '🔴 ¡SALIDA REGISTRADA!';
-                    messageElement.textContent = `¡Adiós ${employee?.name || 'Usuario'}! Tu salida ha sido registrada. ${hours ? `Total: ${hours} horas.` : ''}`;
-                    setTimeout(() => playSound('clock-out'), 100); // Small delay for better UX
+                    statusElement.className = 'status-text clock-out';
+                    statusElement.textContent = 'CLOCK OUT';
+                    greetingElement.textContent = `¡Adiós ${employee?.name || 'Usuario'}!`;
+                    setTimeout(() => playSound('clock-out'), 100);
                 }
             } else {
-                actionElement.className = 'action error';
-                actionElement.innerHTML = '⚠️ ERROR';
-                messageElement.textContent = 'Ha ocurrido un error. Por favor, inténtalo de nuevo o contacta con el gerente.';
-                setTimeout(() => playSound('error'), 100); // Small delay for better UX
+                statusElement.className = 'status-text error';
+                statusElement.textContent = 'ERROR';
+                greetingElement.textContent = 'Ha ocurrido un error';
+                setTimeout(() => playSound('error'), 100);
             }
         }
 
@@ -290,7 +227,6 @@
             
             if (countdown <= 0) {
                 clearInterval(timer);
-                // Try to close if opened from app, otherwise redirect to homepage
                 if (window.history.length > 1) {
                     window.history.back();
                 } else {
@@ -299,14 +235,18 @@
             }
         }, 1000);
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            updateDisplay();
-            enableAudioOnInteraction();
-        });
+        // Initialize
+        document.addEventListener('DOMContentLoaded', updateDisplay);
 
-        // Immediately try to enable audio context
-        enableAudioOnInteraction();
+        // Enable audio on any user interaction
+        ['click', 'touchstart', 'keydown'].forEach(event => {
+            document.addEventListener(event, function() {
+                const audios = document.querySelectorAll('audio');
+                audios.forEach(audio => {
+                    audio.muted = false;
+                });
+            }, { once: true });
+        });
     </script>
 </body>
 </html>
