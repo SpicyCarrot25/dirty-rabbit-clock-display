@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dirty Rabbit - Control de Horario</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-width: 350px;
+            width: 90%;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .employee-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #fff;
+            margin: 0 auto 20px;
+            border: 4px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: #8B4513;
+        }
+        
+        .employee-name {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .action {
+            font-size: 20px;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 15px;
+            font-weight: 500;
+        }
+        
+        .clock-in {
+            background: rgba(76, 175, 80, 0.8);
+            border: 2px solid #4CAF50;
+        }
+        
+        .clock-out {
+            background: rgba(244, 67, 54, 0.8);
+            border: 2px solid #f44336;
+        }
+        
+        .error {
+            background: rgba(255, 152, 0, 0.8);
+            border: 2px solid #ff9800;
+        }
+        
+        .time {
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 10px;
+        }
+        
+        .message {
+            font-size: 16px;
+            line-height: 1.4;
+            margin-bottom: 20px;
+        }
+        
+        .auto-close {
+            font-size: 14px;
+            opacity: 0.8;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 0.4; }
+        }
+        
+        .success-animation {
+            animation: successPulse 0.6s ease-out;
+        }
+        
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="main-container">
+        <div class="logo">☕ Dirty Rabbit</div>
+        
+        <div class="employee-photo" id="employee-photo">
+            👤
+        </div>
+        
+        <div class="employee-name" id="employee-name">
+            Cargando...
+        </div>
+        
+        <div class="action" id="action-status">
+            Procesando...
+        </div>
+        
+        <div class="time" id="current-time">
+            --:--:--
+        </div>
+        
+        <div class="message" id="status-message">
+            Verificando estado...
+        </div>
+        
+        <div class="auto-close">
+            Cerrando automáticamente en <span id="countdown">5</span>s
+        </div>
+    </div>
+
+    <!-- Audio elements for different actions -->
+    <audio id="clock-in-sound" preload="auto">
+        <!-- Google Actions sounds (reliable CDN) -->
+        <source src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" type="audio/ogg">
+        <!-- Backup: data URL for simple beep -->
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYeBDuU2/LTgCwELnzK7+GGRAX9Y7zk4H3AZAAABCgA" type="audio/wav">
+    </audio>
+
+    <audio id="clock-out-sound" preload="auto">
+        <!-- Google Actions sounds (reliable CDN) -->
+        <source src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_short.ogg" type="audio/ogg">
+        <!-- Backup: data URL for simple beep -->
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYeBDuU2/LTgCwELnzK7+GGRAX9Y7zk4H3AZAAABCgA" type="audio/wav">
+    </audio>
+
+    <audio id="error-sound" preload="auto">
+        <!-- Google Actions sounds (reliable CDN) -->
+        <source src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg" type="audio/ogg">
+        <!-- Backup: data URL for simple error beep -->
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYeBDuU2/LTgCwELnzK7+GGRAX9Y7zk4H3AZAAABCgA" type="audio/wav">
+    </audio>
+
+    <script>
+        // Employee data
+        const employees = {
+            'DR001': { name: 'Maria Garcia', emoji: '👩‍💼' },
+            'DR002': { name: 'Francisca Lopez', emoji: '👩‍🍳' },
+            'DR003': { name: 'Juan Martinez', emoji: '👨‍💼' }
+        };
+
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const employeeId = urlParams.get('employee');
+        const status = urlParams.get('status');
+        const action = urlParams.get('action');
+        const timestamp = urlParams.get('timestamp');
+        const hours = urlParams.get('hours');
+
+        // Audio control with better browser compatibility
+        function playSound(soundType) {
+            try {
+                const audio = document.getElementById(soundType + '-sound');
+                if (audio) {
+                    audio.volume = 0.3; // Keep it gentle
+                    
+                    // Create a promise-based approach with fallback
+                    const playPromise = audio.play();
+                    
+                    if (playPromise !== undefined) {
+                        playPromise
+                            .then(() => {
+                                console.log('Audio played successfully');
+                            })
+                            .catch(error => {
+                                console.log('Audio play failed:', error);
+                                // Enable audio on next user interaction
+                                enableAudioOnInteraction();
+                            });
+                    }
+                }
+            } catch (e) {
+                console.log('Audio error:', e);
+                enableAudioOnInteraction();
+            }
+        }
+
+        // Enable audio on user interaction (required by many browsers)
+        function enableAudioOnInteraction() {
+            const enableAudio = () => {
+                const audios = document.querySelectorAll('audio');
+                audios.forEach(audio => {
+                    audio.muted = false;
+                    audio.play().then(() => {
+                        audio.pause();
+                        audio.currentTime = 0;
+                    }).catch(() => {});
+                });
+            };
+
+            // Add listeners for various interaction types
+            ['click', 'touchstart', 'keydown'].forEach(event => {
+                document.addEventListener(event, enableAudio, { once: true });
+            });
+        }
+
+        // Update display
+        function updateDisplay() {
+            const employee = employees[employeeId];
+            const now = new Date();
+            
+            // Update employee info
+            if (employee) {
+                document.getElementById('employee-name').textContent = employee.name;
+                document.getElementById('employee-photo').textContent = employee.emoji;
+            }
+            
+            // Update time
+            document.getElementById('current-time').textContent = 
+                now.toLocaleTimeString('es-ES', { 
+                    hour12: false, 
+                    timeZone: 'Europe/Madrid' 
+                });
+            
+            // Update status and play appropriate sound
+            const actionElement = document.getElementById('action-status');
+            const messageElement = document.getElementById('status-message');
+            
+            if (status === 'success') {
+                document.getElementById('main-container').classList.add('success-animation');
+                
+                if (action === 'CLOCK_IN') {
+                    actionElement.className = 'action clock-in';
+                    actionElement.innerHTML = '🟢 ¡ENTRADA REGISTRADA!';
+                    messageElement.textContent = `¡Hola ${employee?.name || 'Usuario'}! Tu entrada ha sido registrada correctamente.`;
+                    setTimeout(() => playSound('clock-in'), 100); // Small delay for better UX
+                } else if (action === 'CLOCK_OUT') {
+                    actionElement.className = 'action clock-out';
+                    actionElement.innerHTML = '🔴 ¡SALIDA REGISTRADA!';
+                    messageElement.textContent = `¡Adiós ${employee?.name || 'Usuario'}! Tu salida ha sido registrada. ${hours ? `Total: ${hours} horas.` : ''}`;
+                    setTimeout(() => playSound('clock-out'), 100); // Small delay for better UX
+                }
+            } else {
+                actionElement.className = 'action error';
+                actionElement.innerHTML = '⚠️ ERROR';
+                messageElement.textContent = 'Ha ocurrido un error. Por favor, inténtalo de nuevo o contacta con el gerente.';
+                setTimeout(() => playSound('error'), 100); // Small delay for better UX
+            }
+        }
+
+        // Auto-close functionality
+        let countdown = 5;
+        const countdownElement = document.getElementById('countdown');
+        
+        const timer = setInterval(() => {
+            countdown--;
+            countdownElement.textContent = countdown;
+            
+            if (countdown <= 0) {
+                clearInterval(timer);
+                // Try to close if opened from app, otherwise redirect to homepage
+                if (window.history.length > 1) {
+                    window.history.back();
+                } else {
+                    window.location.href = '/';
+                }
+            }
+        }, 1000);
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDisplay();
+            enableAudioOnInteraction();
+        });
+
+        // Immediately try to enable audio context
+        enableAudioOnInteraction();
+    </script>
+</body>
+</html>
